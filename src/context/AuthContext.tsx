@@ -74,10 +74,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // back the user to login-in page
   useEffect(() => {
-    if (
-      localStorage.getItem('cookieFallback') === '[]' ||
-      localStorage.getItem('cookieFallback') === null
-    )
+    // localStorage.getItem('cookieFallback') === null
+    if (localStorage.getItem('cookieFallback') === '[]')
       // hook
       navigate('/sign-in')
     // check user auth
