@@ -10,26 +10,11 @@ import {
   useGetCurrentUser,
 } from "@/lib/react-query/queries";
 
-/**
- * Description placeholder
- * @date 3/5/2024 - 12:55:29 AM
- *
- * @typedef {PostStatsProps}
- */
 type PostStatsProps = {
   post: Models.Document;
   userId: string;
 };
 
-/**
- * likes, comments under the post card
- * @date 3/5/2024 - 12:55:28 AM
- *
- * @param {PostStatsProps} param0
- * @param {Models.Document} param0.post
- * @param {string} param0.userId
- * @returns {*}
- */
 const PostStats = ({ post, userId }: PostStatsProps) => {
   const location = useLocation();
   const likesList = post.likes.map((user: Models.Document) => user.$id);
@@ -88,8 +73,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
 
   return (
     <div
-      className={`flex justify-between items-center z-20 ${containerStyles}`}
-    >
+      className={`flex justify-between items-center z-20 ${containerStyles}`}>
       <div className="flex gap-2 mr-5">
         <img
           src={`${

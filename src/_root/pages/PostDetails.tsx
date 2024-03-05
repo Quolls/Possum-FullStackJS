@@ -12,12 +12,6 @@ import {
 import { multiFormatDateString } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
 
-/**
- * PostDetails
- * @date 3/5/2024 - 6:52:25 PM
- *
- * @returns {*}
- */
 const PostDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -44,8 +38,7 @@ const PostDetails = () => {
         <Button
           onClick={() => navigate(-1)}
           variant="ghost"
-          className="shad-button_ghost"
-        >
+          className="shad-button_ghost">
           <img
             src={"/assets/icons/back.svg"}
             alt="back"
@@ -70,8 +63,7 @@ const PostDetails = () => {
             <div className="flex-between w-full">
               <Link
                 to={`/profile/${post?.creator.$id}`}
-                className="flex items-center gap-3"
-              >
+                className="flex items-center gap-3">
                 <img
                   src={
                     post?.creator.imageUrl ||
@@ -99,8 +91,7 @@ const PostDetails = () => {
               <div className="flex-center gap-4">
                 <Link
                   to={`/update-post/${post?.$id}`}
-                  className={`${user.id !== post?.creator.$id && "hidden"}`}
-                >
+                  className={`${user.id !== post?.creator.$id && "hidden"}`}>
                   <img
                     src={"/assets/icons/edit.svg"}
                     alt="edit"
@@ -109,14 +100,12 @@ const PostDetails = () => {
                   />
                 </Link>
 
-                {/* delete button */}
                 <Button
                   onClick={handleDeletePost}
                   variant="ghost"
                   className={`ost_details-delete_btn ${
                     user.id !== post?.creator.$id && "hidden"
-                  }`}
-                >
+                  }`}>
                   <img
                     src={"/assets/icons/delete.svg"}
                     alt="delete"
@@ -135,8 +124,7 @@ const PostDetails = () => {
                 {post?.tags.map((tag: string, index: string) => (
                   <li
                     key={`${tag}${index}`}
-                    className="text-light-3 small-regular"
-                  >
+                    className="text-light-3 small-regular">
                     #{tag}
                   </li>
                 ))}
