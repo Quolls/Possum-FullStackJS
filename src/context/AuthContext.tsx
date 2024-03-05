@@ -1,16 +1,17 @@
-import { getCurrentUser } from '@/lib/appwrite/api'
-import { IContextType } from '@/types'
-import { createContext, useContext, useEffect, useState } from 'react'
-// hook
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
+import { createContext, useContext, useEffect, useState } from "react";
+
+import { IUser } from "@/types";
+import { getCurrentUser } from "@/lib/appwrite/api";
+
 export const INITIAL_USER = {
-  id: '',
-  name: '',
-  username: '',
-  email: '',
-  imageUrl: '',
-  bio: ''
-}
+  id: "",
+  name: "",
+  username: "",
+  email: "",
+  imageUrl: "",
+  bio: "",
+};
 
 const INITIAL_STATE = {
   user: INITIAL_USER,
@@ -18,38 +19,30 @@ const INITIAL_STATE = {
   isAuthenticated: false,
   setUser: () => {},
   setIsAuthenticated: () => {},
-  checkAuthUser: async () => false as boolean
-}
+  checkAuthUser: async () => false as boolean,
+};
 
-const AuthContext = createContext<IContextType>(INITIAL_STATE)
+type IContextType = {
+  user: IUser;
+  isLoading: boolean;
+  setUser: React.Dispatch<React.SetStateAction<IUser>>;
+  isAuthenticated: boolean;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  checkAuthUser: () => Promise<boolean>;
+};
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<IUser>(INITIAL_USER)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+const AuthContext = createContext<IContextType>(INITIAL_STATE);
 
-  // hook
-  const navigate = useNavigate()
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<IUser>(INITIAL_USER);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const checkAuthUser = async () => {
-    // try {
-    //   const { $id, name, username, email, imageUrl, bio } =
-    //     await getCurrentUser()
-
-    //   // as we don't have currentUser variable, we directly use id to do the judge
-    //   if ($id) {
-    //     setUser({
-    //       id: $id,
-    //       name: name,
-    //       username: username,
-    //       email: email,
-    //       imageUrl: imageUrl,
-    //       bio: bio
-    //     })
-    //   }
-    // }
+    setIsLoading(true);
     try {
-      const currentAccount = await getCurrentUser()
+      const currentAccount = await getCurrentUser();
       if (currentAccount) {
         setUser({
           id: currentAccount.$id,
@@ -57,30 +50,34 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           username: currentAccount.username,
           email: currentAccount.email,
           imageUrl: currentAccount.imageUrl,
-          bio: currentAccount.bio
-        })
-        setIsAuthenticated(true)
-        return true
-      }
-      // if outside the block
-      return false
-    } catch (err) {
-      console.log(err)
-      return false
-    } finally {
-      setIsLoading(false)
-    }
-  }
+          bio: currentAccount.bio,
+        });
+        setIsAuthenticated(true);
 
-  // back the user to login-in page
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error(error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // localStorage.getItem('cookieFallback') === null
-    if (localStorage.getItem('cookieFallback') === '[]')
-      // hook
-      navigate('/sign-in')
-    // check user auth
-    checkAuthUser()
-  }, [])
+    const cookieFallback = localStorage.getItem("cookieFallback");
+    if (
+      cookieFallback === "[]" ||
+      cookieFallback === null ||
+      cookieFallback === undefined
+    ) {
+      navigate("/sign-in");
+    }
+
+    checkAuthUser();
+  }, []);
 
   const value = {
     user,
@@ -88,11 +85,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading,
     isAuthenticated,
     setIsAuthenticated,
-    checkAuthUser
-  }
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    checkAuthUser,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export default AuthProvider
-
-export const useUserContext = () => useContext(AuthContext)
+export const useUserContext = () => useContext(AuthContext);

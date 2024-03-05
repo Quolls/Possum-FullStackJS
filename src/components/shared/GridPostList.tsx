@@ -29,7 +29,6 @@ const GridPostList = ({
             />
           </Link>
 
-          {/* post left-bottom corner icon */}
           <div className="grid-post_user">
             {showUser && (
               <div className="flex items-center justify-start gap-2 flex-1">
