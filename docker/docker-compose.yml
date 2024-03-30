@@ -1,0 +1,17 @@
+services:
+  mongodb:
+    image: mongo:7.0.7
+    container_name: mongodb
+    ports:
+      - "27017:27017" # Map TCP port 27017 inside the container to port 27017 on the Docker host.
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rootuser 
+      MONGO_INITDB_ROOT_PASSWORD: rootpass 
+    volumes:
+      - mongodb_data:/data/db # Persist MongoDB data to named volume
+      - mongodb_config:/data/configdb # Persist MongoDB configuration to named volume
+    command: [--auth] # Enable MongoDB authentication
+
+volumes:
+  mongodb_data: # This named volume will store MongoDB data
+  mongodb_config: # This named volume will store MongoDB config data
