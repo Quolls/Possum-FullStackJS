@@ -58,13 +58,24 @@ export async function saveUserToDB(user: {
   }
 }
 
-// ============================== SIGN IN
+/**
+ * Sign in a user using their email and password.
+ *
+ * @param {Object} user - The user's email and password.
+ * @param {string} user.email - The user's email.
+ * @param {string} user.password - The user's password.
+ * @return {Promise} A promise that resolves to the session object of the signed in user.
+ * @throws {Error} If there is an error during the sign in process.
+ */
 export async function signInAccount(user: { email: string; password: string }) {
   try {
+    // Create a session using the user's email and password.
     const session = await account.createEmailSession(user.email, user.password);
-
+    console.log("session", session);
+    // Return the session object of the signed in user.
     return session;
   } catch (error) {
+    // Log any errors that occur during the sign in process.
     console.log(error);
   }
 }
