@@ -72,7 +72,6 @@ export const useGetPosts = () => {
   });
 };
 
-
 export const useSearchPosts = (searchTerm: string) => {
   return useQuery({
     queryKey: [QUERY_KEYS.SEARCH_POSTS, searchTerm],
@@ -134,6 +133,7 @@ export const useDeletePost = () => {
     mutationFn: ({ postId, imageId }: { postId?: string; imageId: string }) =>
       deletePost(postId, imageId),
     onSuccess: () => {
+      console.log("delete", QUERY_KEYS.GET_RECENT_POSTS);
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
       });

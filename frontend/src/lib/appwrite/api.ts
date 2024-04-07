@@ -345,6 +345,12 @@ export async function deletePost(postId?: string, imageId?: string) {
   if (!postId || !imageId) return;
 
   try {
+    console.log(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      postId
+    );
+
     const statusCode = await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
@@ -354,10 +360,10 @@ export async function deletePost(postId?: string, imageId?: string) {
     if (!statusCode) throw Error;
 
     await deleteFile(imageId);
-
+    console.log("appwrite finished deleting");
     return { status: "Ok" };
   } catch (error) {
-    console.log(error);
+    console.log("appwrite delete failed", error);
   }
 }
 
@@ -371,6 +377,12 @@ export async function likePost(postId: string, likesArray: string[]) {
       {
         likes: likesArray,
       }
+    );
+    console.log(
+      "liked",
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      postId
     );
 
     if (!updatedPost) throw Error;

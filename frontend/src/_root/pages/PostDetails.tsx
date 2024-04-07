@@ -28,6 +28,7 @@ const PostDetails = () => {
   );
 
   const handleDeletePost = () => {
+    console.log('I am deleting...');
     deletePost({ postId: id, imageId: post?.imageId });
     navigate(-1);
   };
