@@ -1,25 +1,27 @@
-import { useCallback, useState } from "react";
-import { FileWithPath, useDropzone } from "react-dropzone";
-
+import React, { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import Swiper from "@/components/swiper/Swiper"; // 确保路径正确
 import { Button } from "@/components/ui";
-import { convertFileToUrl } from "@/lib/utils";
 
-type FileUploaderProps = {
-  fieldChange: (files: File[]) => void;
-  mediaUrl: string;
-};
+interface FileUploaderProps {
+  fieldChange: (files: File[]) => void; // 用于处理文件上传的回调
+  mediaUrl?: string; // 可选的，用于显示已有图片的URL
+}
 
 const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
-  const [file, setFile] = useState<File[]>([]);
-  const [fileUrl, setFileUrl] = useState<string>(mediaUrl);
+  const [fileUrls, setFileUrls] = useState<string[]>(
+    mediaUrl ? [mediaUrl] : []
+  );
 
   const onDrop = useCallback(
-    (acceptedFiles: FileWithPath[]) => {
-      setFile(acceptedFiles);
-      fieldChange(acceptedFiles);
-      setFileUrl(convertFileToUrl(acceptedFiles[0]));
+    (acceptedFiles: File[]) => {
+      const newFileUrls = acceptedFiles.map((file) =>
+        URL.createObjectURL(file)
+      );
+      setFileUrls((prevUrls) => [...prevUrls, ...newFileUrls]);
+      fieldChange(acceptedFiles); // 注意：这里应该触发实际的文件上传逻辑
     },
-    [file]
+    [fieldChange]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -27,6 +29,7 @@ const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
     accept: {
       "image/*": [".png", ".jpeg", ".jpg"],
     },
+    multiple: true,
   });
 
   return (
@@ -34,28 +37,29 @@ const FileUploader = ({ fieldChange, mediaUrl }: FileUploaderProps) => {
       {...getRootProps()}
       className="flex flex-center flex-col bg-dark-3 rounded-xl cursor-pointer">
       <input {...getInputProps()} className="cursor-pointer" />
-
-      {fileUrl ? (
-        <>
-          <div className="flex flex-1 justify-center w-full p-5 lg:p-10">
-            <img src={fileUrl} alt="image" className="file_uploader-img" />
-          </div>
-          <p className="file_uploader-label">Click or drag photo to replace</p>
-        </>
+      {fileUrls.length > 0 ? (
+        <Swiper>
+          {fileUrls.map((url, index) => (
+            <img
+              key={index}
+              src={url}
+              alt={`Preview ${index}`}
+              className="file_uploader-img"
+            />
+          ))}
+        </Swiper>
       ) : (
-        <div className="file_uploader-box ">
+        <div className="file_uploader-box">
           <img
             src="/assets/icons/file-upload.svg"
             width={96}
             height={77}
             alt="file upload"
           />
-
           <h3 className="base-medium text-light-2 mb-2 mt-6">
             Drag photo here
           </h3>
           <p className="text-light-4 small-regular mb-6">SVG, PNG, JPG</p>
-
           <Button type="button" className="shad-button_dark_4">
             Select from computer
           </Button>
