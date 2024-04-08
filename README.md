@@ -1,5 +1,6 @@
 - [ ] 地址不是自动的
 - [x] 上传多个图片
+- [ ] 展示多个图片
 - [ ] explore功能没啥吊用 - follow 数字有问题
 - [ ] people做一个message功能
 - [ ] 历史回顾，tags sort功能
