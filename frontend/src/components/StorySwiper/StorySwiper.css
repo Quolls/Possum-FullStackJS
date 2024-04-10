@@ -1,0 +1,38 @@
+/* .swiper {
+  width: 30%;
+  height: 30%;
+} */
+
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: #fff;
+
+  /* Center slide text vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.swiper-slide img {
+  display: block;
+  object-fit: cover;
+}
+
+.mySwiper {
+  width: 500px !important; /* 或者任何具体的宽度值 */
+  height: 500px !important; /* 根据你的需求调整高度 */
+}
+
+.mySwiper img {
+  width: 100%; /* 图片宽度占满容器 */
+  height: 100%; /* 图片高度占满容器 */
+  object-fit: cover; /* 保持宽高比，可能会裁剪图片 */
+}
+
+@media (max-width: 600px) {
+  .mySwiper {
+    width: 350px !important;
+    height: 200px !important; /* 在小屏幕上减小高度 */
+  }
+}
