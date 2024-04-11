@@ -5,6 +5,15 @@ import { PostStats } from "@/components/shared";
 import { multiFormatDateString } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
 
+// Swiper imports
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/effect-cube";
+// import "swiper/css/pagination";
+import "swiper/css/scrollbar";
+import "../StorySwiper/StorySwiper.css";
+import { EffectCube, Scrollbar, Autoplay, Navigation } from "swiper/modules";
+
 type PostCardProps = {
   post: Models.Document;
 };
@@ -68,13 +77,53 @@ const PostCard = ({ post }: PostCardProps) => {
             ))}
           </ul>
         </div>
-
+      </Link>
+      {post.imageS && post.imageS.length > 0 ? (
+        <div className="overflow-hidden">
+          <Swiper
+            autoHeight={true} // 自动调整高度
+            resizeObserver={true}
+            effect={"cube"}
+            grabCursor={true}
+            cubeEffect={{
+              shadow: true,
+              slideShadows: true,
+              shadowOffset: 20,
+              shadowScale: 0.94,
+            }}
+            centeredSlides={true}
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+            }}
+            scrollbar={{ hide: true }}
+            // if you wanna cube, add EffectCube in the following list
+            modules={[Autoplay, Navigation, Scrollbar]}
+            slidesPerView={1}
+            className="mySwiper">
+            {post.imageS.map(
+              (
+                imageUrl: string,
+                index: number // Explicitly declare types here
+              ) => (
+                <SwiperSlide key={index} className="overflow-hidden">
+                  <img
+                    src={imageUrl || "/assets/icons/profile-placeholder.svg"}
+                    alt={`post image ${index}`}
+                    className="post-card_img"
+                  />
+                </SwiperSlide>
+              )
+            )}
+          </Swiper>
+        </div>
+      ) : (
         <img
-          src={post.imageUrl || "/assets/icons/profile-placeholder.svg"}
-          alt="post image"
+          src={"/assets/icons/profile-placeholder.svg"}
+          alt="default post image"
           className="post-card_img"
         />
-      </Link>
+      )}
 
       <PostStats post={post} userId={user.id} />
     </div>
