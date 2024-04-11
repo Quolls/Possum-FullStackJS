@@ -1,17 +1,18 @@
 import { Models } from "appwrite";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationLink,
-  PaginationEllipsis,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
 // import { useToast } from "@/components/ui/use-toast";
-import { Loader, PostCard, UserCard } from "@/components/shared";
-import { useGetRecentPosts, useGetUsers } from "@/lib/react-query/queries";
+import { Loader, PostCard } from "@/components/shared";
+import { useGetRecentPosts } from "@/lib/react-query/queries";
 import "../../components/Pagination/Pagination.css";
 const Home = () => {
   // const { toast } = useToast();
@@ -19,7 +20,7 @@ const Home = () => {
   // State for managing current page
   const [currentPage, setCurrentPage] = useState(1);
   // Number of posts per page
-  const postsPerPage = 4;
+  const postsPerPage = 10;
 
   const {
     data: posts,
@@ -27,19 +28,30 @@ const Home = () => {
     isError: isErrorPosts,
   } = useGetRecentPosts();
 
-  // const {
-  //   data: creators,
-  //   isLoading: isUserLoading,
-  //   isError: isErrorCreators,
-  // } = useGetUsers(10);
+  // 新的状态用于控制ScrollArea的显示
+  const [showScrollArea, setShowScrollArea] = useState(false);
+  // Toggle函数用于切换ScrollArea的显示状态
+  const toggleScrollArea = () => {
+    setShowScrollArea((prevState) => !prevState); // 使用函数式更新
+  };
+
+  // tags
+  const [uniqueTags, setUniqueTags] = useState<string[]>([]);
+  const [selectedTag, setSelectedTag] = useState("All"); // 新增状态
+
+  // 从帖子数据中提取并处理标签
+  useEffect(() => {
+    if (posts && posts.documents) {
+      const tags = posts.documents
+        .flatMap((post) => post.tags)
+        .filter((value, index, self) => self.indexOf(value) === index);
+      setUniqueTags(tags);
+    }
+  }, [posts]);
 
   // Calculate the current posts to display
-  // 确定当前页应显示的帖子
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts =
-    posts?.documents?.slice(indexOfFirstPost, indexOfLastPost) ?? [];
-
   // Change page handler
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
@@ -55,8 +67,29 @@ const Home = () => {
       </div>
     );
   }
-  // 计算总页数
-  const totalPages = Math.ceil((posts?.documents?.length ?? 0) / postsPerPage);
+  // 根据selectedTag过滤帖子
+  const filteredPosts =
+    selectedTag === "All"
+      ? posts?.documents ?? []
+      : posts?.documents?.filter((post) => post.tags.includes(selectedTag)) ??
+        [];
+
+  // 重新计算总页数，基于过滤后的帖子数量
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+  // 更新按钮文本的逻辑，确保“所有”按钮正确显示选中的标签或默认文本
+  const buttonText =
+    selectedTag === "All"
+      ? "All"
+      : selectedTag.length > 10
+      ? `${selectedTag.slice(0, 10)}...`
+      : selectedTag;
+
+  // 使用filteredPosts计算当前页面显示的帖子
+  const currentFilteredPosts = filteredPosts.slice(
+    indexOfFirstPost,
+    indexOfLastPost
+  );
 
   return (
     <div className="flex flex-1">
@@ -64,23 +97,59 @@ const Home = () => {
         <div className="home-posts">
           <div className="flex-between w-full max-w-5xl mb-7">
             <h2 className="h3-bold md:h2-bold text-left w-full">Home Feed</h2>
-            <div className="flex-center gap-3 bg-dark-3 rounded-xl px-4 py-2 cursor-pointer">
-              <p className="small-medium md:base-medium text-light-2">All</p>
+            <div
+              className="flex-center gap-3 bg-dark-3 rounded-xl px-4 py-2 cursor-pointer"
+              onClick={toggleScrollArea}>
+              <p className="small-medium md:base-medium text-light-2">
+                {buttonText}
+              </p>
               <img
                 src="/assets/icons/filter.svg"
                 width={20}
                 height={20}
                 alt="filter"
               />
+              {selectedTag !== "All" && (
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation(); // 防止触发toggleScrollArea
+                    setSelectedTag("All");
+                    setCurrentPage(1);
+                  }}
+                  className="cursor-pointer">
+                  ×
+                </div>
+              )}
             </div>
           </div>
+          {showScrollArea && (
+            <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4 my-4">
+              <div className="p-4">
+                <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4>
+                {uniqueTags.map((tag) => (
+                  <React.Fragment key={tag}>
+                    <div
+                      onClick={() => {
+                        setSelectedTag(tag);
+                        setCurrentPage(1); // 筛选后跳转到第一页
+                        setShowScrollArea(false);
+                      }}
+                      className="text-sm cursor-pointer">
+                      {tag}
+                    </div>
+                    <Separator className="my-2" />
+                  </React.Fragment>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
           {isPostLoading && !posts ? (
             <Loader />
           ) : (
             <>
               <ul>
-                {currentPosts.map((post: Models.Document) => (
-                  <li key={post.$id}>
+                {currentFilteredPosts.map((post: Models.Document) => (
+                  <li key={post.$id} style={{ marginBottom: "10px" }}>
                     <PostCard post={post} />
                   </li>
                 ))}
@@ -95,7 +164,7 @@ const Home = () => {
                       }}
                       className={
                         currentPage === 1
-                          ? "disabled-linkpagination-button"
+                          ? "disabled-link pagination-button"
                           : "pagination-button"
                       }
                     />
@@ -128,20 +197,6 @@ const Home = () => {
           )}
         </div>
       </div>
-      {/* <div className="home-creators">
-        <h3 className="h3-bold text-light-1">Top Creators</h3>
-        {isUserLoading && !creators ? (
-          <Loader />
-        ) : (
-          <ul className="grid 2xl:grid-cols-2 gap-6">
-            {creators?.documents.map((creator) => (
-              <li key={creator?.$id}>
-                <UserCard user={creator} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </div> */}
     </div>
   );
 };
