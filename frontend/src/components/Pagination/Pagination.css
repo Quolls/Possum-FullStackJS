@@ -1,0 +1,33 @@
+.pagination-button:active {
+  /* 按钮被点击时的样式 */
+  opacity: 0.7;
+}
+
+.pagination-button:focus {
+  /* 移除或自定义:focus状态样式以防止点击后一直变白 */
+  outline: none; /* 举例：移除焦点轮廓 */
+}
+
+.active-page {
+  color: white; /* 活跃页码的文字颜色 */
+  background-color: #007bff; /* 活跃页码的背景颜色 */
+}
+
+.pagination-button:focus {
+  /* 取消默认的焦点样式，使其看起来像未被点击状态 */
+  outline: none;
+  color: black /* 默认颜色 */;
+  background-color: black /* 默认背景色 */;
+}
+
+.pagination-button:active {
+  /* 点击时的颜色变化 */
+  color: white /* 点击时的颜色 */;
+  background-color: white /* 点击时的背景色 */;
+}
+
+.disabled-link,
+.pagination-link:focus {
+  outline: none; /* 移除焦点轮廓 */
+  /* 可以在这里添加其他样式来覆盖默认的:focus样式 */
+}

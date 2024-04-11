@@ -131,22 +131,29 @@ export async function signOutAccount() {
 // ============================== CREATE POST
 export async function createPost(post: INewPost) {
   try {
-    // Upload file to appwrite storage
-    const uploadedFile = await uploadFile(post.file[0]);
+    const uploadPromises = post.file.map((file) => uploadFile(file));
+    const uploadedFiles = await Promise.all(uploadPromises);
 
-    if (!uploadedFile) throw Error;
+    const fileUrls = await Promise.all(
+      uploadedFiles.map((file) => {
+        if (!file) throw Error;
+        return getFilePreview(file.$id);
+      })
+    );
 
-    // Get file url
-    const fileUrl = getFilePreview(uploadedFile.$id);
-    if (!fileUrl) {
-      await deleteFile(uploadedFile.$id);
+    if (fileUrls.some((url) => !url)) {
+      uploadedFiles.forEach((file) => {
+        if (file) deleteFile(file.$id);
+      });
       throw Error;
     }
 
-    // Convert tags into array
     const tags = post.tags?.replace(/ /g, "").split(",") || [];
 
-    // Create post
+    // 使用 imageS 数组中的第一个 URL 作为 imageUrl 的值
+    const imageUrl = fileUrls[0]; // 假设总是至少有一个文件被上传
+    const imageId = uploadedFiles[0]?.$id;
+
     const newPost = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
@@ -154,15 +161,18 @@ export async function createPost(post: INewPost) {
       {
         creator: post.userId,
         caption: post.caption,
-        imageUrl: fileUrl,
-        imageId: uploadedFile.$id,
+        imageUrl, // 保持与当前数据库模型兼容
+        imageId,
+        imageS: fileUrls, // 存储所有上传的图片 URLs
         location: post.location,
         tags: tags,
       }
     );
 
     if (!newPost) {
-      await deleteFile(uploadedFile.$id);
+      uploadedFiles.forEach((file) => {
+        if (file) deleteFile(file.$id);
+      });
       throw Error;
     }
 
@@ -345,6 +355,12 @@ export async function deletePost(postId?: string, imageId?: string) {
   if (!postId || !imageId) return;
 
   try {
+    console.log(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      postId
+    );
+
     const statusCode = await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
@@ -354,10 +370,10 @@ export async function deletePost(postId?: string, imageId?: string) {
     if (!statusCode) throw Error;
 
     await deleteFile(imageId);
-
+    console.log("appwrite finished deleting");
     return { status: "Ok" };
   } catch (error) {
-    console.log(error);
+    console.log("appwrite delete failed", error);
   }
 }
 
@@ -371,6 +387,12 @@ export async function likePost(postId: string, likesArray: string[]) {
       {
         likes: likesArray,
       }
+    );
+    console.log(
+      "liked",
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      postId
     );
 
     if (!updatedPost) throw Error;
@@ -443,7 +465,7 @@ export async function getRecentPosts() {
     const posts = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
-      [Query.orderDesc("$createdAt"), Query.limit(20)]
+      [Query.orderDesc("$createdAt")] // 移除了 Query.limit 和 Query.offset
     );
 
     if (!posts) throw Error;
