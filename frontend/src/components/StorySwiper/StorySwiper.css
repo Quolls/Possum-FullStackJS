@@ -22,17 +22,27 @@
 .mySwiper {
   width: 500px !important; /* 或者任何具体的宽度值 */
   height: 500px !important; /* 根据你的需求调整高度 */
+  border-radius: 20px; /* 添加圆角，10px为例 */
 }
 
 .mySwiper img {
   width: 100%; /* 图片宽度占满容器 */
   height: 100%; /* 图片高度占满容器 */
   object-fit: cover; /* 保持宽高比，可能会裁剪图片 */
+  border-radius: 10px; /* 添加圆角，10px为例 */
 }
 
 @media (max-width: 600px) {
   .mySwiper {
-    width: 350px !important;
+    width: 340px !important;
     height: 200px !important; /* 在小屏幕上减小高度 */
   }
 }
+
+@media (max-width: 390px) {
+  .mySwiper {
+    width: 300px !important;
+    height: 200px !important; /* 在小屏幕上减小高度 */
+  }
+}
+
